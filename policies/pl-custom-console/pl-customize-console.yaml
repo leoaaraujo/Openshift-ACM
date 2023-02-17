@@ -1,0 +1,164 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: pl-console-customization
+  namespace: custom-policy
+  annotations:
+    policy.open-cluster-management.io/standards: NIST-CSF
+    policy.open-cluster-management.io/categories: PR.IP Information Protection Processes and Procedures
+    policy.open-cluster-management.io/controls: PR.AC-4 Access Control
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-banner
+        spec:
+          remediationAction: enforce
+          severity: high
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - default
+              - custom-policy
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: console.openshift.io/v1
+                kind: ConsoleNotification
+                metadata:
+                  name: banner-local-cluster
+                spec:
+                  text: '{{ fromClusterClaim "name" }} - managed by ACM'
+                  level: "info"
+                  location: BannerTop 
+                  color: 'white'
+                  backgroundColor: 'red'
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-logo
+        spec:
+          remediationAction: enforce
+          severity: high
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - default
+              - custom-policy
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                binaryData:
+                  logo.png: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "logo.png"  hub}}'
+                kind: ConfigMap
+                metadata:
+                  creationTimestamp: null
+                  name: console-custom-logo
+                  namespace: openshift-config
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operator.openshift.io/v1
+                kind: Console
+                metadata:
+                  name: cluster
+                spec:
+                  customization:
+                    customLogoFile:
+                      key: logo.png
+                      name: console-custom-logo
+                    customProductName: Company|Console
+                  logLevel: Normal
+                  managementState: Managed
+                  operatorLogLevel: Normal                  
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-consolelink
+        spec:
+          remediationAction: enforce
+          severity: high
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - default
+              - custom-policy
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: console.openshift.io/v1
+                kind: ConsoleLink
+                metadata:
+                  name: 'application-menu-link-{{hub fromConfigMap "custom-policy" "cm-policy-data" "intranet-name"  hub}}'
+                spec:
+                  href: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "intranet-url"  hub}}'
+                  location: ApplicationMenu
+                  text: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "intranet-name"  hub}}'
+                  applicationMenu:
+                    section: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "intranet-section"  hub}}'
+                    imageURL: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "intranet-icon"  hub}}'                               
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: console.openshift.io/v1
+                kind: ConsoleLink
+                metadata:
+                  name: 'application-menu-link-{{hub fromConfigMap "custom-policy" "cm-policy-data" "jira-name"  hub}}'
+                spec:
+                  href: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "jira-url"  hub}}'
+                  location: ApplicationMenu
+                  text: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "jira-name"  hub}}'
+                  applicationMenu:
+                    section: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "jira-section"  hub}}'
+                    imageURL: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "jira-icon"  hub}}' 
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: console.openshift.io/v1
+                kind: ConsoleLink
+                metadata:
+                  name: 'application-menu-link-{{hub fromConfigMap "custom-policy" "cm-policy-data" "monitoring-name"  hub}}'
+                spec:
+                  href: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "monitoring-url"  hub}}'
+                  location: ApplicationMenu
+                  text: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "monitoring-name"  hub}}'
+                  applicationMenu:
+                    section: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "monitoring-section"  hub}}'
+                    imageURL: '{{hub fromConfigMap "custom-policy" "cm-policy-data" "monitoring-icon"  hub}}'                                         
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-pl-console-customization
+  namespace: custom-policy
+placementRef:
+  name: placement-pl-console-customization
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: pl-console-customization
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-pl-console-customization
+  namespace: custom-policy
+spec:
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: customize
+        operator: In
+        values:
+          - console
