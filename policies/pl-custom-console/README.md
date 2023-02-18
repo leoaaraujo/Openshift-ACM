@@ -5,7 +5,9 @@
 ```shell
 # oc new-project custom-policy
 
+
 # IMAGE=`base64 -w0 logo.png`
+
 
 # oc create configmap cm-policy-data \
 --from-literal=logo.png=${IMAGE} \
@@ -22,3 +24,13 @@
 
 # oc create -f pl-custom-console.yaml
 ```
+
+&nbsp;
+
+## Policy
+![](applied-policy.png)
+
+&nbsp;
+
+## Policy
+![](console-after.png)
