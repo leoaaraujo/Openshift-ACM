@@ -3,6 +3,8 @@
 
 
 ```shell
+# oc new-project custom-policy
+
 # IMAGE=`base64 -w0 logo.png`
 
 # oc create configmap cm-policy-data \
@@ -17,8 +19,6 @@
 --from-literal=monitoring-url="https://zabbix.com" \
 --from-literal=monitoring-icon="https://icons.iconarchive.com/icons/emey87/trainee/32/System-monitoring-icon.png" \
 -n custom-policy
-```
 
-```shell
 # oc create -f pl-custom-console.yaml
 ```
