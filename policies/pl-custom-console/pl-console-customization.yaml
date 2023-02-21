@@ -17,6 +17,7 @@ spec:
         metadata:
           name: policy-banner
         spec:
+          pruneObjectBehavior: DeleteIfCreated
           remediationAction: enforce
           severity: high
           namespaceSelector:
@@ -33,10 +34,10 @@ spec:
                 metadata:
                   name: 'banner-{{ fromClusterClaim "name" }}'
                 spec:
-                  text: '{{ fromClusterClaim "name" }} - managed by ACM'
+                  text: '{{ fromClusterClaim "env" }} | {{ fromClusterClaim "name" }} - managed by ACM'
                   location: BannerTop 
                   color: 'white'
-                  backgroundColor: 'red'
+                  backgroundColor: '{{- if eq (fromClusterClaim "env") "prod" -}} green {{- else -}} blue {{- end -}}'                
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
@@ -45,6 +46,7 @@ spec:
         spec:
           remediationAction: enforce
           severity: high
+          pruneObjectBehavior: DeleteIfCreated
           namespaceSelector:
             exclude:
               - kube-*
@@ -85,6 +87,7 @@ spec:
         spec:
           remediationAction: enforce
           severity: high
+          pruneObjectBehavior: DeleteIfCreated
           namespaceSelector:
             exclude:
               - kube-*
