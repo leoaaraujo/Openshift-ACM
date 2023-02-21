@@ -23,14 +23,16 @@
 -n custom-policy
 
 # oc create -f pl-custom-console.yaml
+
+# oc label managedcluster {{ managedcluster name }} customize=console env=prod 
 ```
 
 &nbsp;
 
-## Policy
-![](applied-policy.png)
+## Policy - with label env=prod
+![](console-prod.png)
 
 &nbsp;
 
-## Policy
-![](console-after.png)
+## Policy - with label env=prod
+![](console-dev.png)
