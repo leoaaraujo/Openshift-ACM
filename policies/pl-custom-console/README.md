@@ -22,7 +22,7 @@
 --from-literal=monitoring-icon="https://icons.iconarchive.com/icons/emey87/trainee/32/System-monitoring-icon.png" \
 -n custom-policy
 
-# oc create -f pl-custom-console.yaml
+# oc create -f pl-console-customization.yaml
 
 # oc label managedcluster {{ managedcluster name }} customize=console env=prod 
 ```
