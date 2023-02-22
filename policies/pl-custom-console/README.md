@@ -34,5 +34,5 @@
 
 &nbsp;
 
-## Policy - with label env=prod
+## Policy - with label env=dev
 ![](console-dev.png)
